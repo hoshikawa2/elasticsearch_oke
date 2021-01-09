@@ -1,0 +1,35 @@
+apiVersion: networking.istio.io/v1alpha3
+kind: Gateway
+metadata:
+  name: kibana-gateway
+spec:
+  selector:
+    istio: ingressgateway # use Istio default gateway implementation
+  servers:
+  - port:
+      number: 5601
+      name: kibana
+      protocol: HTTP
+    hosts:
+    - "*"
+---
+apiVersion: networking.istio.io/v1alpha3
+kind: VirtualService
+metadata:
+  name: kibana-vts
+spec:
+  hosts:
+  - "*"
+  gateways:
+  - kibana-gateway
+  http:
+  - match:
+    - uri:
+        prefix: /
+    rewrite:
+        uri: /
+    route:
+    - destination:
+        port:
+          number: 5601
+        host: dev-kibana-logging.devops.svc.cluster.local
